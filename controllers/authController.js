@@ -14,14 +14,15 @@ const login = asyncHandler(async (req, res) => {
     }
 
     const foundUser = await User.findOne({ username }).exec()
+    console.log(foundUser)
 
-    if (!foundUser || !foundUser.active) {
-        return res.status(401).json({ message: 'Unauthorized' })
+    if (!foundUser || !foundUser.status) {
+        return res.status(401).json({ message: 'User does not exist or inactive' })
     }
 
     const match = await bcrypt.compare(password, foundUser.password)
 
-    if (!match) return res.status(401).json({ message: 'Unauthorized' })
+    if (!match) return res.status(401).json({ message: 'Invalid password' })
 
     const accessToken = jwt.sign(
         {

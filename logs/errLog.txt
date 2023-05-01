@@ -1,1 +1,5 @@
 20230418	14:51:04	9b3fc2fc-a1a9-47dd-8cdd-86e86466444a	Error: ENOENT: no such file or directory, stat 'D:\KK\intranet\server\views\index.html'
+20230501	12:18:13	cfd3cd3c-986a-4df7-abb5-7574e099c6b6	Error: Not allowed by CORS
+20230501	12:29:04	969a9e07-8739-46c6-9cf8-c85c056aa391	Error: data and hash arguments required
+20230501	12:32:05	c831d593-ae60-4797-bcd3-7c07a7a10a67	Error: data and hash arguments required
+20230501	12:32:16	723fad9b-9556-4092-b3f8-74ff167b8dff	Error: data and hash arguments required

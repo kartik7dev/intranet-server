@@ -4,8 +4,13 @@ const Schema = mongoose.Schema
 const userSchema = new Schema({
     firstName : {
         type : String,
+        default : 'Admin'
     },
     lastName : {
+        type : String,
+        default : 'Kumar'
+    },
+    username : {
         type : String,
     },
     email : {
@@ -17,7 +22,7 @@ const userSchema = new Schema({
     },
     password : {
         type : String,
-        select : false
+        required : true
     },
     roles: { 
         type: String, 
@@ -25,14 +30,11 @@ const userSchema = new Schema({
     },
     status: {
         type: String, 
-        default: 0
+        default: 1
     },
     created: {
         type: Date, 
         default: Date.now
-    },
-    refreshToken : {
-        type: [String]
     }
 })
 
