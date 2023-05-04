@@ -14,7 +14,7 @@ const login = asyncHandler(async (req, res) => {
     }
 
     const foundUser = await User.findOne({ username }).exec()
-    console.log(foundUser)
+   
 
     if (!foundUser || !foundUser.status) {
         return res.status(401).json({ message: 'User does not exist or inactive' })
@@ -32,25 +32,25 @@ const login = asyncHandler(async (req, res) => {
             }
         },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '15m' }
+        { expiresIn: '30s' }
     )
 
     const refreshToken = jwt.sign(
         { "username": foundUser.username },
         process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: '7d' }
+        { expiresIn: '1d' }
     )
 
     // Create secure cookie with refresh token 
     res.cookie('jwt', refreshToken, {
-        httpOnly: true, //accessible only by web server 
+        httpOnly: false, //accessible only by web server 
         secure: false, //https
         sameSite: 'None', //cross-site cookie 
         maxAge: 7 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
     })
 
     // Send accessToken containing username and roles 
-    res.json({ accessToken })
+    res.json({ token:accessToken, user:foundUser })
 })
 
 // @desc Refresh
@@ -58,7 +58,7 @@ const login = asyncHandler(async (req, res) => {
 // @access Public - because access token has expired
 const refresh = (req, res) => {
     const cookies = req.cookies
-
+    console.log("cookies",cookies)
     if (!cookies?.jwt) return res.status(401).json({ message: 'Unauthorized' })
 
     const refreshToken = cookies.jwt
