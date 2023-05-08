@@ -141,3 +141,13 @@
 20230504	16:03:40	8bcf7454-21f1-483d-85aa-b4251befcc77	POST	http://localhost:3000	/auth
 20230504	16:10:57	90261a37-6b71-4462-97e7-7b641ea0974a	OPTIONS	http://localhost:3000	/auth
 20230504	16:10:57	f5eafd03-8000-4171-a9f5-33c82587da77	POST	http://localhost:3000	/auth
+20230508	09:11:01	0f85866a-2af5-4184-8dad-8e736b63cc79	OPTIONS	http://localhost:3000	/auth
+20230508	09:11:01	338d795c-9f0e-4565-9dcd-31a529752e93	POST	http://localhost:3000	/auth
+20230508	09:16:08	7a5144da-d61b-4307-b94f-5c19359ffe27	OPTIONS	http://localhost:3000	/auth
+20230508	09:16:08	6b5a2672-75f7-44c3-9d92-3c7b0536ed32	POST	http://localhost:3000	/auth
+20230508	09:18:40	b801b632-7546-4ac4-af22-474a56d3ef63	OPTIONS	http://localhost:3000	/auth
+20230508	09:18:40	0371cf85-3fdc-4732-9d2f-42b5e51774c5	POST	http://localhost:3000	/auth
+20230508	09:19:33	45ccc71f-c110-4c44-bbf9-2523683a509a	OPTIONS	http://localhost:3000	/auth
+20230508	09:19:33	4995bcb1-7fb1-4d45-9e91-a562b8bef7fc	POST	http://localhost:3000	/auth
+20230508	09:34:00	16ab618e-aacb-40a5-a83e-522d63a0140f	OPTIONS	http://localhost:3000	/auth
+20230508	09:34:00	1a419825-4bc5-4653-8562-b555abd564f9	POST	http://localhost:3000	/auth

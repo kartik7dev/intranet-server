@@ -14,6 +14,7 @@ const login = asyncHandler(async (req, res) => {
     }
 
     const foundUser = await User.findOne({ username }).exec()
+  
    
 
     if (!foundUser || !foundUser.status) {
@@ -49,8 +50,17 @@ const login = asyncHandler(async (req, res) => {
         maxAge: 7 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
     })
 
+    const user = {
+        firstName : foundUser.firstName,
+        lastName : foundUser.lastName,
+        username : foundUser.username,
+        email : foundUser.email,
+        roles : foundUser.roles,
+        status : foundUser.status
+    }
+
     // Send accessToken containing username and roles 
-    res.json({ token:accessToken, user:foundUser })
+    res.json({ token:accessToken, user:user })
 })
 
 // @desc Refresh
