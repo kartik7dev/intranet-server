@@ -21,12 +21,13 @@ const getAllCategories = asyncHandler(async (req, res) => {
 // @route POST /categories
 // @access Private
 const createNewCategory = asyncHandler(async (req, res) => {
-    const { categoryName } = req.body
-
+    let { categoryName } = req.body.values
     // Confirm category
     if (!categoryName) {
         return res.status(400).json({ message: 'category name is required' })
     }
+
+    categoryName = categoryName.toLowerCase()
 
     // Check for duplicate category name
     const duplicate = await Category.findOne({ categoryName }).lean().exec()
