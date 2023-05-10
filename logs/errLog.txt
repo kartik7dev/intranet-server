@@ -3,3 +3,5 @@
 20230501	12:29:04	969a9e07-8739-46c6-9cf8-c85c056aa391	Error: data and hash arguments required
 20230501	12:32:05	c831d593-ae60-4797-bcd3-7c07a7a10a67	Error: data and hash arguments required
 20230501	12:32:16	723fad9b-9556-4092-b3f8-74ff167b8dff	Error: data and hash arguments required
+20230509	11:50:08	f27af442-2085-463e-b1e0-db0120712ee0	TypeError: Assignment to constant variable.
+20230510	14:34:58	519e55dd-f128-4b8a-b2f5-657115b2f80d	ReferenceError: title is not defined

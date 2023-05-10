@@ -40,7 +40,7 @@ const createNewCategory = asyncHandler(async (req, res) => {
     const category = await Category.create({ categoryName })
 
     if (category) { // Created 
-        return res.status(201).json({ message: 'New category created successfully' })
+        return res.status(201).json({ message: 'New category created successfully',data:category})
     } else {
         return res.status(400).json({ message: 'Invalid category data received' })
     }
@@ -50,7 +50,7 @@ const createNewCategory = asyncHandler(async (req, res) => {
 // @route PATCH /categories
 // @access Private
 const updateCategory = asyncHandler(async (req, res) => {
-    const { categoryName } = req.body
+    const { id,categoryName } = req.body.values
 
     // Confirm data
     if (!categoryName) {
@@ -65,7 +65,7 @@ const updateCategory = asyncHandler(async (req, res) => {
     }
 
     // Check for duplicate title
-    const duplicate = await Category.findOne({ title }).lean().exec()
+    const duplicate = await Category.findOne({ categoryName }).lean().exec()
 
     // Allow renaming of the original category 
     if (duplicate && duplicate?._id.toString() !== id) {
@@ -76,13 +76,14 @@ const updateCategory = asyncHandler(async (req, res) => {
 
     const updatedCategory = await category.save()
 
-    res.json(`Catgory updated successfully`)
+    res.status(201).json({ message:'Category updated successfully',data:updatedCategory})
 })
 
 // @desc Delete a category
 // @route DELETE /categories
 // @access Private
 const deleteCategory = asyncHandler(async (req, res) => {
+    console.log(req)
     const { id } = req.body
 
     // Confirm data
@@ -99,9 +100,7 @@ const deleteCategory = asyncHandler(async (req, res) => {
 
     const result = await category.deleteOne()
 
-    const reply = `Category deleted successfully`
-
-    res.json(reply)
+    res.status(201).json({message:'Category deleted successfully'})
 })
 
 module.exports = {

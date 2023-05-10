@@ -60,7 +60,7 @@ const login = asyncHandler(async (req, res) => {
     }
 
     // Send accessToken containing username and roles 
-    res.json({ token:accessToken, user:user })
+    res.json({ token:accessToken, user:JSON.stringify(user) })
 })
 
 // @desc Refresh
