@@ -6,6 +6,11 @@ const categorySchema = new Schema({
         type : String,
         required : true    
     },
+    parentId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Category',
+        default: null
+    },
     status: {
         type: Number, 
         default: 1
