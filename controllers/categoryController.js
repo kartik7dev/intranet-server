@@ -81,8 +81,8 @@ const updateCategory = asyncHandler(async (req, res) => {
     category.categoryName = categoryName
     category.parentId = parentId
 
-    const updatedCategory = await category.save()
-    await updatedCategory.populate('parentId').execPopulate();
+    let updatedCategory = await category.save()
+    updatedCategory = await Category.findById(category._id).populate('parentId').lean().exec();
     res.status(201).json({ message:'Category updated successfully',data:updatedCategory})
 })
 
