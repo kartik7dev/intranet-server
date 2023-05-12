@@ -1,42 +1,43 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-const userSchema = new Schema({
-    firstName : {
-        type : String,
-        default : 'Admin'
+const projectSchema = new Schema({
+    categoryId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Category',
+        required : true
     },
-    lastName : {
-        type : String,
-        default : 'Kumar'
-    },
-    username : {
-        type : String,
-    },
-    email : {
-        type : String,
-        required : true,
-        index : {
-            unique : true
-        }
-    },
-    password : {
+    projectTitle : {
         type : String,
         required : true
     },
-    roles: { 
-        type: String, 
-        default: 'Admin'
+    piName : {
+        type : String,
+        required : true
+    },
+    focalPoint : {
+        type : String,
+        required : true,
+    },
+    projectType: {
+        type: Number,
+        enum: [0, 1], // 0 - Ongoing,1-Completed
+        default: 0 
     },
     status: {
-        type: String, 
+        type: Number,
+        enum: [0, 1], // 0 - Inactive,1-Active
         default: 1
     },
     created: {
+        type: Date, 
+        default: Date.now
+    },
+    modified: {
         type: Date, 
         default: Date.now
     }
 })
 
 
-module.exports = mongoose.model('User',userSchema)
+module.exports = mongoose.model('Project',projectSchema)
