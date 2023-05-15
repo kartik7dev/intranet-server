@@ -7,6 +7,11 @@ const projectSchema = new Schema({
         ref: 'Category',
         required : true
     },
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required : true
+    },
     projectTitle : {
         type : String,
         required : true
