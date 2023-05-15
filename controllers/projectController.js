@@ -1,4 +1,5 @@
 const Project = require('../model/Project')
+const ProjectDoc = require('../model/ProjectDoc')
 const asyncHandler = require('express-async-handler')
 
 // @desc Get all projects 
@@ -21,36 +22,22 @@ const getAllProjects = asyncHandler(async (req, res) => {
 // @route POST /projects
 // @access Private
 const createNewProject = asyncHandler(async (req, res) => {
-    let { projectName, parentId } = req.body.values
-    // Confirm project
-    if (!projectName) {
-        return res.status(400).json({ message: 'project name is required' })
-    }
-
-    projectName = projectName.toLowerCase()
-
-    // Check for duplicate project name
-    const duplicate = await Project.findOne({ projectName }).lean().exec()
-
-    if (duplicate) {
-        return res.status(409).json({ message: 'Project name must be unique' })
-    }
-
-    if (parentId === "") {
-        parentId = null;
-    }
-
-    // Create and store the new user 
-    let project = await Project.create({ projectName, parentId })
-
-
-    if (project) { // Created 
-        project = await Project.findById(project._id).populate('parentId').lean().exec();
-        return res.status(201).json({ message: 'New project created successfully',data:project})
-    } else {
-        return res.status(400).json({ message: 'Invalid project data received' })
-    }
-})
+    let { projectTitle, userId, categoryId, piName, focalPoint, projectType } = req.body;
+  
+    // Create and store the new project
+    const project = await Project.create({ projectTitle, userId, categoryId, piName, focalPoint, projectType });
+    
+    const file  = req.file;
+        // Create a new ProjectDoc instance
+    const projectDoc = await ProjectDoc.create({
+          projectId: project._id,
+          projectDoc: file.filename
+        });
+  
+  
+      return res.status(201).json({ message: 'Project was added successfully' });
+    
+  });
 
 // @desc Update a project
 // @route PATCH /projects

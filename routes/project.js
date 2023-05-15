@@ -2,12 +2,17 @@ const express = require('express')
 const router = express.Router()
 const projectController = require('../controllers/projectController')
 const verifyJWT = require('../middleware/verifyJWT')
+const fileUpload = require("express-fileupload");
+const filesPayloadExists = require('../middleware/filesPayloadExists');
+const fileExtLimiter = require('../middleware/fileExtLimiter');
+const fileSizeLimiter = require('../middleware/fileSizeLimiter');
+const {upload} = require('../middleware/fileHelper');
 
 router.use(verifyJWT)
 
 router.route('/')
     .get(projectController.getAllProjects)
-    .post(projectController.createNewProject)
+    .post(upload.single('projectDoc'),projectController.createNewProject)
     .patch(projectController.updateProject)
 router.route('/:id').delete(projectController.deleteProject)
 router.route('/count').get(projectController.getProjectCount)    
