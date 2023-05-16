@@ -13,8 +13,9 @@ router.use(verifyJWT)
 router.route('/')
     .get(projectController.getAllProjects)
     .post(upload.single('projectDoc'),projectController.createNewProject)
-    .patch(projectController.updateProject)
+    .patch(upload.single('projectDoc'),projectController.updateProject)
 router.route('/:id').delete(projectController.deleteProject)
+router.route('/get/:id').get(projectController.getProjectByid)
 router.route('/count').get(projectController.getProjectCount)    
 
 module.exports = router

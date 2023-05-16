@@ -24,6 +24,10 @@ const projectSchema = new Schema({
         type : String,
         required : true,
     },
+    projectDocs: [{
+        type: Schema.Types.ObjectId,
+        ref: 'ProjectDoc'
+      }],
     projectType: {
         type: Number,
         enum: [0, 1], // 0 - Ongoing,1-Completed

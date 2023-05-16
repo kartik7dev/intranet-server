@@ -1,6 +1,8 @@
 const Project = require('../model/Project')
 const ProjectDoc = require('../model/ProjectDoc')
 const asyncHandler = require('express-async-handler')
+const fs = require('fs');
+const path = require('path');
 
 // @desc Get all projects 
 // @route GET /projects
@@ -33,6 +35,9 @@ const createNewProject = asyncHandler(async (req, res) => {
           projectId: project._id,
           projectDoc: file.filename
         });
+
+    project.projectDocs.push(projectDoc._id);
+    await project.save();    
   
   
       return res.status(201).json({ message: 'Project was added successfully' });
@@ -43,34 +48,38 @@ const createNewProject = asyncHandler(async (req, res) => {
 // @route PATCH /projects
 // @access Private
 const updateProject = asyncHandler(async (req, res) => {
-    const { id,projectName,parentId } = req.body.values
+    let { id, projectTitle, userId, categoryId, piName, focalPoint, projectType } = req.body;
+    console.log(req.body)
+  
+    // find the existing project
+    const project = await Project.findById(id).exec();
+    
+    if(req.file){
+    const file  = req.file;
+        // Delete existing document
+    const result = await ProjectDoc.findOneAndDelete({ projectId: id })
+    const filePath = path.join(__dirname, 'public/uploads', result.projectDoc);
+    fs.unlinkSync(filePath);
+    project.projectDocs = project.projectDocs.filter(docId => !docId.equals(result._id));
 
-    // Confirm data
-    if (!projectName) {
-        return res.status(400).json({ message: 'project name is required' })
+    const projectDoc = await ProjectDoc.create({
+          projectId: project._id,
+          projectDoc: file.filename
+        });
+    project.projectDocs.push(projectDoc._id);
     }
-
-    // Confirm project exists to update
-    const project = await Project.findById(id).exec()
-
-    if (!project) {
-        return res.status(400).json({ message: 'Project not found' })
-    }
-
-    // Check for duplicate title
-    const duplicate = await Project.findOne({ projectName }).lean().exec()
-
-    // Allow renaming of the original project 
-    if (duplicate && duplicate?._id.toString() !== id) {
-        return res.status(409).json({ message: 'Duplicate project title' })
-    }    
-
-    project.projectName = projectName
-    project.parentId = parentId
-
-    let updatedProject = await project.save()
-    updatedProject = await Project.findById(project._id).populate('parentId').lean().exec();
-    res.status(201).json({ message:'Project updated successfully',data:updatedProject})
+     // Update project fields
+     project.projectTitle = projectTitle;
+     project.userId = userId;
+     project.categoryId = categoryId;
+     project.piName = piName;
+     project.focalPoint = focalPoint;
+     project.projectType = projectType;
+ 
+    await project.save();    
+  
+  
+      return res.status(201).json({ message: 'Project was updated successfully' });
 })
 
 // @desc Delete a project
@@ -104,10 +113,30 @@ const getProjectCount = asyncHandler(async (req, res) => {
     res.json({ count })
 })
 
+// @desc Get project by id
+// @route GET /projects/get
+// @access Private
+const getProjectByid = asyncHandler(async (req, res) => {
+    try {
+        const { id } = req.params;
+        const project = await Project.findById(id).populate('projectDocs');
+    
+        if (!project) {
+          return res.status(404).json({ error: 'Project not found' });
+        }
+    
+        res.status(201).json({message:'Project fetched successfully',data:project});
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+})
+
 module.exports = {
     getAllProjects,
     createNewProject,
     updateProject,
     deleteProject,
-    getProjectCount
+    getProjectCount,
+    getProjectByid
 }
