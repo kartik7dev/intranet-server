@@ -48,9 +48,9 @@ const createNewProject = asyncHandler(async (req, res) => {
 // @route PATCH /projects
 // @access Private
 const updateProject = asyncHandler(async (req, res) => {
-    let { id, projectTitle, userId, categoryId, piName, focalPoint, projectType } = req.body;
+    let { _id, projectTitle, categoryId, piName, focalPoint, projectType } = req.body;
     console.log(req.body)
-  
+    const id = _id
     // find the existing project
     const project = await Project.findById(id).exec();
     
@@ -70,7 +70,6 @@ const updateProject = asyncHandler(async (req, res) => {
     }
      // Update project fields
      project.projectTitle = projectTitle;
-     project.userId = userId;
      project.categoryId = categoryId;
      project.piName = piName;
      project.focalPoint = focalPoint;
