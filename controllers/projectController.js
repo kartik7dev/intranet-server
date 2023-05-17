@@ -9,7 +9,8 @@ const path = require('path');
 // @access Private
 const getAllProjects = asyncHandler(async (req, res) => {
     // Get all projects from MongoDB
-    const projects = await Project.find().populate('categoryId').lean()
+    const projects = await Project.find({status : 1}).populate([{ path: 'categoryId' },{ path: 'userId' }]).lean()
+
 
     // If no projects 
     if (!projects?.length) {
@@ -131,11 +132,31 @@ const getProjectByid = asyncHandler(async (req, res) => {
       }
 })
 
+// @desc Get project by id
+// @route GET /projects/delete
+// @access Private
+const projectDeactivate = asyncHandler(async (req, res) => {
+    try {
+        const { id } = req.body;
+        const project = await Project.findByIdAndUpdate(id,{status:0},{new:true});
+    
+        if (!project) {
+          return res.status(404).json({ error: 'Project not updated' });
+        }
+    
+        res.status(201).json({message:'Project deleted successfully'});
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+})
+
 module.exports = {
     getAllProjects,
     createNewProject,
     updateProject,
     deleteProject,
     getProjectCount,
-    getProjectByid
+    getProjectByid,
+    projectDeactivate
 }

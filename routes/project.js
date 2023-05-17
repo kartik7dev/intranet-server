@@ -16,6 +16,7 @@ router.route('/')
     .patch(upload.single('projectDoc'),projectController.updateProject)
 router.route('/:id').delete(projectController.deleteProject)
 router.route('/get/:id').get(projectController.getProjectByid)
-router.route('/count').get(projectController.getProjectCount)    
+router.route('/count').get(projectController.getProjectCount)
+router.route('/delete').patch(projectController.projectDeactivate)    
 
 module.exports = router

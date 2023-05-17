@@ -47,6 +47,7 @@ app.use('/register', require('./routes/register'))
 app.use('/auth', require('./routes/auth'))
 app.use('/categories', require('./routes/category'))
 app.use('/projects', require('./routes/project'))
+app.use('/project-reviews', require('./routes/project-review'))
 
 app.all('*', (req, res) => {
     res.status(404);
