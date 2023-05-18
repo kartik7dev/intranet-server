@@ -2,13 +2,13 @@ const express = require('express')
 const router = express.Router()
 const projectController = require('../controllers/projectReviewController')
 const verifyJWT = require('../middleware/verifyJWT')
-const {upload} = require('../middleware/fileHelper');
+const {uploadReview} = require('../middleware/fileHelper');
 
 router.use(verifyJWT)
 
 router.route('/')
     // .get(projectReviewController.getAllProjects)
-    .post(upload.single('projectReviewDoc'),projectController.createNewProjectReview)
+    .post(uploadReview.single('projectReviewDoc'),projectController.createNewProjectReview)
 //     .patch(upload.single('projectDoc'),projectController.updateProject)
 // router.route('/:id').delete(projectController.deleteProject)
 // router.route('/get/:id').get(projectController.getProjectByid)

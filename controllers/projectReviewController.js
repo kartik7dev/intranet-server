@@ -24,7 +24,7 @@ const getAllProjectReviewById = asyncHandler(async (req, res) => {
 // @route POST /projects
 // @access Private
 const createNewProjectReview = asyncHandler(async (req, res) => {
-    let { projectId, userId, remarks, description, reviewParameter1,reviewParameter2,reviewParameter3,reviewParameter4,reviewParameter5, reviewTotal,reviewedBy } = req.body;
+    let { projectId, userId, remarks, description, reviewParameter1,reviewParameter2,reviewParameter3,reviewParameter4,reviewParameter5, reviewTotal,reviewedBy, reviewDate } = req.body;
   
     // Create and store the new projectReview
     
@@ -32,12 +32,12 @@ const createNewProjectReview = asyncHandler(async (req, res) => {
     // Create a new ProjectReviewDoc instance
     const projectReviewDoc = file.filename
         
-    const project = await ProjectReview.create({ projectId, userId, remarks, description, projectReviewDoc, reviewParameter1,reviewParameter2,reviewParameter3,reviewParameter4,reviewParameter5, reviewTotal, reviewedBy });  
+    const project = await ProjectReview.create({ projectId, userId, remarks, description, projectReviewDoc, reviewParameter1,reviewParameter2,reviewParameter3,reviewParameter4,reviewParameter5, reviewTotal, reviewedBy, reviewDate });  
   
     if(project)
       return res.status(201).json({ message: 'ProjectReview was added successfully' });
     else
-    return res.status(409).json({ message: 'Unable to create project' })
+    return res.status(409).json({ message: 'Unable to add project review' })
   });
 
 // @desc Update a project
