@@ -104,14 +104,6 @@ const deleteProject = asyncHandler(async (req, res) => {
     res.status(201).json({message:'Project deleted successfully'})
 })
 
-// @desc Get the count of all projects
-// @route GET /projects/count
-// @access Private
-const getProjectCount = asyncHandler(async (req, res) => {
-    const count = await Project.countDocuments().exec()
-
-    res.json({ count })
-})
 
 // @desc Get project by id
 // @route GET /projects/get
@@ -132,8 +124,8 @@ const getProjectByid = asyncHandler(async (req, res) => {
       }
 })
 
-// @desc Get project by id
-// @route GET /projects/delete
+// @desc deactive project
+// @route PATCH /projects/delete
 // @access Private
 const projectDeactivate = asyncHandler(async (req, res) => {
     try {
@@ -156,7 +148,6 @@ module.exports = {
     createNewProject,
     updateProject,
     deleteProject,
-    getProjectCount,
     getProjectByid,
     projectDeactivate
 }

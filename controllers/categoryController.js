@@ -108,19 +108,9 @@ const deleteCategory = asyncHandler(async (req, res) => {
     res.status(201).json({message:'Category deleted successfully'})
 })
 
-// @desc Get the count of all categories
-// @route GET /categories/count
-// @access Private
-const getCategoryCount = asyncHandler(async (req, res) => {
-    const count = await Category.countDocuments().exec()
-
-    res.json({ count })
-})
-
 module.exports = {
     getAllCategories,
     createNewCategory,
     updateCategory,
-    deleteCategory,
-    getCategoryCount
+    deleteCategory
 }
