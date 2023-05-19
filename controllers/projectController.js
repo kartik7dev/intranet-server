@@ -9,7 +9,7 @@ const path = require('path');
 // @access Private
 const getAllProjects = asyncHandler(async (req, res) => {
     // Get all projects from MongoDB
-    const projects = await Project.find({status : 1}).populate([{ path: 'categoryId' },{ path: 'userId' }]).lean()
+    const projects = await Project.find({status : 1}).populate([{ path: 'categoryId' },{ path: 'userId' },{path: 'projectDocs'}]).lean()
 
 
     // If no projects 
