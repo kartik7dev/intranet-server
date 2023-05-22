@@ -44,7 +44,7 @@ const createNewProjectReview = asyncHandler(async (req, res) => {
 // @route PATCH /projects
 // @access Private
 const updateProjectReview = asyncHandler(async (req, res) => {
-    let { _id, projectTitle, categoryId, piName, focalPoint, projectType } = req.body;
+    let { _id, projectId, userId, remarks, description, reviewParameter1,reviewParameter2,reviewParameter3,reviewParameter4,reviewParameter5, reviewTotal, reviewedBy, reviewDate } = req.body;
     console.log(req.body)
     const id = _id
     // find the existing project
@@ -53,28 +53,27 @@ const updateProjectReview = asyncHandler(async (req, res) => {
     if(req.file){
     const file  = req.file;
         // Delete existing document
-    const result = await ProjectReviewDoc.findOneAndDelete({ projectId: id })
-    const filePath = path.join(__dirname, 'public/uploads', result.projectDoc);
+    const filePath = path.join(__dirname, '../public/reviewdocs', project.projectReviewDoc);
+    console.log(filePath)
     fs.unlinkSync(filePath);
-    project.projectDocs = project.projectDocs.filter(docId => !docId.equals(result._id));
-
-    const projectDoc = await ProjectReviewDoc.create({
-          projectId: project._id,
-          projectDoc: file.filename
-        });
-    project.projectDocs.push(projectDoc._id);
+    project.projectReviewDoc = file.filename;
     }
      // Update project fields
-     project.projectTitle = projectTitle;
-     project.categoryId = categoryId;
-     project.piName = piName;
-     project.focalPoint = focalPoint;
-     project.projectType = projectType;
+     project.remarks = remarks;
+     project.description = description;
+     project.reviewParameter1 = reviewParameter1;
+     project.reviewParameter2 = reviewParameter2;
+     project.reviewParameter3 = reviewParameter3;
+     project.reviewParameter4 = reviewParameter4;
+     project.reviewParameter5 = reviewParameter5;
+     project.reviewTotal = reviewTotal;
+     project.reviewedBy = reviewedBy;
+     project.reviewDate = reviewDate;
  
     await project.save();    
   
   
-      return res.status(201).json({ message: 'ProjectReview was updated successfully' });
+      return res.status(201).json({ message: 'Project Review was updated successfully' });
 })
 
 // @desc Delete a project
@@ -114,7 +113,7 @@ const getProjectReviewCount = asyncHandler(async (req, res) => {
 const getProjectReviewByid = asyncHandler(async (req, res) => {
     try {
         const { id } = req.params;
-        const project = await ProjectReview.findById(id).populate('projectDocs');
+        const project = await ProjectReview.findById(id).exec();
     
         if (!project) {
           return res.status(404).json({ error: 'ProjectReview not found' });
@@ -135,4 +134,5 @@ module.exports = {
     updateProjectReview,
     deleteProjectReview,
     getProjectReviewCount,
+    getProjectReviewByid
 }

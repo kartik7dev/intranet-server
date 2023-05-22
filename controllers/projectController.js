@@ -1,5 +1,6 @@
 const Project = require('../model/Project')
 const ProjectDoc = require('../model/ProjectDoc')
+const ProjectReview = require('../model/ProjectReview')
 const asyncHandler = require('express-async-handler')
 const fs = require('fs');
 const path = require('path');
@@ -16,6 +17,25 @@ const getAllProjects = asyncHandler(async (req, res) => {
     if (!projects?.length) {
         return res.status(400).json({ message: 'No projects found' })
     }
+
+      // Fetch project reviews for each project
+  const projectIds = projects.map((project) => project._id);
+  const projectReviews = await ProjectReview.find({ projectId: { $in: projectIds } }).lean();
+
+  // Group project reviews by projectId
+  const projectReviewsByProjectId = projectReviews.reduce((acc, review) => {
+    if (!acc[review.projectId]) {
+      acc[review.projectId] = [];
+    }
+    acc[review.projectId].push(review);
+    return acc;
+  }, {});
+
+  // Assign project reviews to their respective projects
+  projects.forEach((project) => {
+    const projectId = project._id;
+    project.projectReviews = projectReviewsByProjectId[projectId] || [];
+  });
 
 
     res.json(projects)
@@ -59,7 +79,8 @@ const updateProject = asyncHandler(async (req, res) => {
     const file  = req.file;
         // Delete existing document
     const result = await ProjectDoc.findOneAndDelete({ projectId: id })
-    const filePath = path.join(__dirname, 'public/uploads', result.projectDoc);
+    const filePath = path.join(__dirname, '../public/uploads', result.projectDoc);
+    console.log(filePath)
     fs.unlinkSync(filePath);
     project.projectDocs = project.projectDocs.filter(docId => !docId.equals(result._id));
 
