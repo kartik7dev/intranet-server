@@ -41,6 +41,7 @@ app.use(cookieParser());
 // serve static files
 app.use(express.static(path.join(__dirname,'/public')))
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+app.use('/reviewdocs', express.static(path.join(__dirname, 'public/reviewdocs')));
 // routes
 app.use('/', require('./routes/root'));
 app.use('/register', require('./routes/register'))
