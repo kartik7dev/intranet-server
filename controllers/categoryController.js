@@ -108,9 +108,50 @@ const deleteCategory = asyncHandler(async (req, res) => {
     res.status(201).json({message:'Category deleted successfully'})
 })
 
+// Function to fetch categories and their subcategories
+async function fetchCategoriesWithSubcategories() {
+    const categories = await Category.find({},'categoryName parentId').lean();
+  
+    const categoryMap = new Map();
+    const categoriesTree = [];
+  
+    categories.forEach(category => {
+      category.subcategories = [];
+      categoryMap.set(category._id.toString(), category);
+    });
+  
+    categories.forEach(category => {
+      if (category.parentId) {
+        const parentCategory = categoryMap.get(category.parentId._id.toString());
+        if (parentCategory) {
+          parentCategory.subcategories.push(category);
+        }
+      } else {
+        categoriesTree.push(category);
+      }
+    });
+  
+    return categoriesTree;
+  }
+
+// @desc Get all categories and their subcategories
+// @route GET /categories-with-subcategories
+// @access Private
+const categoryTree = asyncHandler(async (req, res) => {
+    const categoriesTree = await fetchCategoriesWithSubcategories();
+  
+    if (!categoriesTree.length) {
+      return res.status(400).json({ message: 'No categories found' });
+    }
+  
+    res.status(201).json({data:categoriesTree});
+  });  
+
+
 module.exports = {
     getAllCategories,
     createNewCategory,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+    categoryTree
 }
