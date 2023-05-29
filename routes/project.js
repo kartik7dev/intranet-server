@@ -8,6 +8,7 @@ const fileExtLimiter = require('../middleware/fileExtLimiter');
 const fileSizeLimiter = require('../middleware/fileSizeLimiter');
 const {upload} = require('../middleware/fileHelper');
 
+router.route('/category/:categoryId').get(projectController.getProjectsByCategoryId)
 router.use(verifyJWT)
 
 router.route('/')
@@ -16,6 +17,7 @@ router.route('/')
     .patch(upload.single('projectDoc'),projectController.updateProject)
 router.route('/:id').delete(projectController.deleteProject)
 router.route('/get/:id').get(projectController.getProjectByid)
+
 router.route('/delete').patch(projectController.projectDeactivate)    
 
 module.exports = router

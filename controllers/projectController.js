@@ -145,6 +145,8 @@ const getProjectByid = asyncHandler(async (req, res) => {
       }
 })
 
+
+
 // @desc deactive project
 // @route PATCH /projects/delete
 // @access Private
@@ -164,11 +166,56 @@ const projectDeactivate = asyncHandler(async (req, res) => {
       }
 })
 
+// @desc Get projects by category ID
+// @route GET /projects/category/:categoryId
+// @access Private
+const getProjectsByCategoryId = asyncHandler(async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+
+    // Get projects by category ID from MongoDB
+    const projects = await Project.find({ categoryId: categoryId, status: 1 }).populate([
+      { path: 'categoryId' },
+      { path: 'projectDocs' }
+    ]).lean();
+
+    // If no projects
+    if (!projects?.length) {
+      return res.status(400).json({ message: 'No projects found for the specified category' });
+    }
+
+    // Fetch project reviews for each project
+    const projectIds = projects.map((project) => project._id);
+    const projectReviews = await ProjectReview.find({ projectId: { $in: projectIds } }).lean();
+
+    // Group project reviews by projectId
+    const projectReviewsByProjectId = projectReviews.reduce((acc, review) => {
+      if (!acc[review.projectId]) {
+        acc[review.projectId] = [];
+      }
+      acc[review.projectId].push(review);
+      return acc;
+    }, {});
+
+    // Assign project reviews to their respective projects
+    projects.forEach((project) => {
+      const projectId = project._id;
+      project.projectReviews = projectReviewsByProjectId[projectId] || [];
+    });
+
+    res.status(201).json({data:projects});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = {
     getAllProjects,
     createNewProject,
     updateProject,
     deleteProject,
     getProjectByid,
-    projectDeactivate
+    projectDeactivate,
+    getProjectsByCategoryId 
 }
