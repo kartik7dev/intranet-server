@@ -45,9 +45,9 @@ const login = asyncHandler(async (req, res) => {
 
     // Create secure cookie with refresh token 
     res.cookie('jwt', refreshToken, {
-        httpOnly: true, //accessible only by web server 
-        secure: true, //https
-        sameSite: 'None', //cross-site cookie 
+        httpOnly: false, //accessible only by web server 
+        secure: false, //https
+        // sameSite: 'None', //cross-site cookie 
         maxAge: 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
     })
 
@@ -70,7 +70,8 @@ const login = asyncHandler(async (req, res) => {
 // @route GET /auth/refresh
 // @access Public - because access token has expired
 const refresh = (req, res) => {
-    const cookies = req.cookies
+  const cookies = req.cookies
+  console.log(cookies)
     if (!cookies?.jwt) return res.status(401).json({ message: 'Unauthorized' })
 
     const refreshToken = cookies.jwt
@@ -133,7 +134,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
       { expiresIn: '30m' }
     );
   
-    const resetUrl =  process.env.SITE_URL + `auth/reset-password/${resetToken}`;
+    const resetUrl =  process.env.SITE_URL + `/auth/reset-password/${resetToken}`;
   
     // Send password reset email
     const mailOptions = {

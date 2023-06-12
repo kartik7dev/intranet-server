@@ -17,7 +17,7 @@ router.route('/')
     .patch(upload.single('projectDoc'),projectController.updateProject)
 router.route('/:id').delete(projectController.deleteProject)
 router.route('/get/:id').get(projectController.getProjectByid)
-
-router.route('/delete').patch(projectController.projectDeactivate)    
+router.route('/delete').patch(projectController.projectDeactivate)
+router.route('/export').post(projectController.exportProjectsToExcel)    
 
 module.exports = router

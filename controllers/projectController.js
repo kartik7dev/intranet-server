@@ -4,21 +4,43 @@ const ProjectReview = require('../model/ProjectReview')
 const asyncHandler = require('express-async-handler')
 const fs = require('fs');
 const path = require('path');
+const ExcelJS = require('exceljs');
 
 // @desc Get all projects 
 // @route GET /projects
 // @access Private
 const getAllProjects = asyncHandler(async (req, res) => {
-    // Get all projects from MongoDB
-    const projects = await Project.find({status : 1}).populate([{ path: 'categoryId' },{ path: 'userId' },{path: 'projectDocs'}]).lean()
+  const { page = 1, perPage = 20, query = null } = req.query;
 
+  const options = {
+    page: parseInt(page, 10),
+    limit: parseInt(perPage, 10),
+    sort: { createdAt: -1 },
+  };
 
-    // If no projects 
-    if (!projects?.length) {
-        return res.status(400).json({ message: 'No projects found' })
-    }
+  const queryFilter = { status: 1 };
 
-      // Fetch project reviews for each project
+  if (query) {
+    queryFilter.$or = [
+      { 'categoryId.categoryName': { $regex: query, $options: 'i' } },
+      { 'userId.firstName': { $regex: query, $options: 'i' } },
+      { 'userId.lastName': { $regex: query, $options: 'i' } },
+      { projectTitle: { $regex: query, $options: 'i' } },
+      { piName: { $regex: query, $options: 'i' } },
+      { focalPoint: { $regex: query, $options: 'i' } },
+    ];
+  }
+
+  const countPromise = Project.countDocuments(queryFilter);
+  const projectsPromise = Project.find(queryFilter)
+    .populate([{ path: 'categoryId' }, { path: 'userId' }, { path: 'projectDocs' }])
+    .skip((options.page - 1) * options.limit)
+    .limit(options.limit)
+    .lean();
+
+  const [projects, totalCount] = await Promise.all([projectsPromise, countPromise]);
+
+  // Fetch project reviews for each project
   const projectIds = projects.map((project) => project._id);
   const projectReviews = await ProjectReview.find({ projectId: { $in: projectIds } }).lean();
 
@@ -37,9 +59,14 @@ const getAllProjects = asyncHandler(async (req, res) => {
     project.projectReviews = projectReviewsByProjectId[projectId] || [];
   });
 
+  if (!projects.length) {
+    return res.status(400).json({ message: 'No projects found' });
+  }
 
-    res.json(projects)
-})
+  res.json({ projects, totalCount });
+});
+
+
 
 // @desc Create new project
 // @route POST /projects
@@ -50,16 +77,17 @@ const createNewProject = asyncHandler(async (req, res) => {
     // Create and store the new project
     const project = await Project.create({ projectTitle, userId, categoryId, piName, focalPoint, projectType });
     
-    const file  = req.file;
-        // Create a new ProjectDoc instance
-    const projectDoc = await ProjectDoc.create({
-          projectId: project._id,
-          projectDoc: file.filename
-        });
+    if(req.file){
+      const file  = req.file;
+          // Create a new ProjectDoc instance
+      const projectDoc = await ProjectDoc.create({
+            projectId: project._id,
+            projectDoc: file.filename
+          });
 
-    project.projectDocs.push(projectDoc._id);
-    await project.save();    
-  
+      project.projectDocs.push(projectDoc._id);
+      await project.save();    
+    }
   
       return res.status(201).json({ message: 'Project was added successfully' });
     
@@ -210,6 +238,65 @@ const getProjectsByCategoryId = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc Export projects to excel
+// @route POST /projects/export/
+// @access Private
+const exportProjectsToExcel = async (req, res) => {
+  try {
+    // Fetch all projects
+    const projects = await Project.find({ status: 1 })
+      .populate([{ path: 'categoryId' }, { path: 'userId' }])
+      .lean();
+
+    if (!projects.length) {
+      return res.status(400).json({ message: 'No projects found' });
+    }
+
+    // Create a new workbook
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Projects');
+
+    // Define column headers
+    worksheet.columns = [
+      { header: 'Project Title', key: 'projectTitle' },
+      { header: 'Category', key: 'category' },
+      { header: 'PI Name', key: 'piName' },
+      { header: 'ISRO CO-PI / Focal Point', key: 'focalPoint' },
+      { header: 'Project Status', key: 'projectType' },
+      { header: 'Posted By', key: 'user' },
+    ];
+
+    // Add project data to the worksheet
+    projects.forEach((project) => {
+      worksheet.addRow({
+        projectTitle: project.projectTitle,
+        category: project.categoryId.categoryName,
+        piName: project.piName,
+        focalPoint: project.focalPoint,
+        projectType : project.projectType === 1 ? 'Completed' : 'Ongoing',
+        user: project.userId.firstName + ' ' + project.userId.lastName,
+       
+      });
+    });
+
+    // Set response headers for file download
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    res.setHeader('Content-Disposition', 'attachment; filename=projects.xlsx');
+
+    // Save the workbook to a buffer
+    const buffer = await workbook.xlsx.writeBuffer();
+
+    // Send the buffer as the response
+    res.send(buffer);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 module.exports = {
     getAllProjects,
     createNewProject,
@@ -217,5 +304,6 @@ module.exports = {
     deleteProject,
     getProjectByid,
     projectDeactivate,
-    getProjectsByCategoryId 
+    getProjectsByCategoryId,
+    exportProjectsToExcel 
 }
