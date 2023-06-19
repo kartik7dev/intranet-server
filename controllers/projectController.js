@@ -22,9 +22,9 @@ const getAllProjects = asyncHandler(async (req, res) => {
 
   if (query) {
     queryFilter.$or = [
-      { 'categoryId.categoryName': { $regex: query, $options: 'i' } },
-      { 'userId.firstName': { $regex: query, $options: 'i' } },
-      { 'userId.lastName': { $regex: query, $options: 'i' } },
+      { 'category.categoryName': { $regex: query, $options: 'i' } },
+      { 'user.firstName': { $regex: query, $options: 'i' } },
+      { 'user.lastName': { $regex: query, $options: 'i' } },
       { projectTitle: { $regex: query, $options: 'i' } },
       { piName: { $regex: query, $options: 'i' } },
       { focalPoint: { $regex: query, $options: 'i' } },
@@ -32,11 +32,46 @@ const getAllProjects = asyncHandler(async (req, res) => {
   }
 
   const countPromise = Project.countDocuments(queryFilter);
-  const projectsPromise = Project.find(queryFilter)
-    .populate([{ path: 'categoryId' }, { path: 'userId' }, { path: 'projectDocs' }])
-    .skip((options.page - 1) * options.limit)
-    .limit(options.limit)
-    .lean();
+  // const projectsPromise = Project.find(queryFilter)
+  //   .populate([{ path: 'categoryId' }, { path: 'userId' }, { path: 'projectDocs' }])
+  //   .skip((options.page - 1) * options.limit)
+  //   .limit(options.limit)
+  //   .lean();
+
+    const projectsPromise = Project.aggregate([
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'categoryId',
+          foreignField: '_id',
+          as: 'category',
+        },
+      },
+     
+      { $unwind: '$category' },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user',
+        },
+      },
+      { $unwind: '$user' },
+      {
+        $lookup: {
+          from: 'projectdocs',
+          localField: '_id',
+          foreignField: 'projectId',
+          as: 'projectDocs',
+        },
+      },
+      { $match: queryFilter },
+      { $skip: (options.page - 1) * options.limit },
+      { $limit: options.limit },
+      { $project: { category: 1, user: 1, projectDocs: 1, projectTitle : 1, piName : 1,focalPoint : 1, projectType : 1,_id : 1 } },
+    ]);
+    
 
   const [projects, totalCount] = await Promise.all([projectsPromise, countPromise]);
 
