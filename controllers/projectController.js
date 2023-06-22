@@ -5,6 +5,8 @@ const asyncHandler = require('express-async-handler')
 const fs = require('fs');
 const path = require('path');
 const ExcelJS = require('exceljs');
+const mongoose = require("mongoose");
+
 
 // @desc Get all projects 
 // @route GET /projects
@@ -237,34 +239,38 @@ const getProjectsByCategoryId = asyncHandler(async (req, res) => {
     const { categoryId } = req.params;
 
     // Get projects by category ID from MongoDB
-    const projects = await Project.find({ categoryId: categoryId, status: 1 }).populate([
-      { path: 'categoryId' },
-      { path: 'projectDocs' }
-    ]).lean();
-
+    // const projects = await Project.find({ categoryId: categoryId, status: 1 }).populate([
+    //   { path: 'categoryId' },
+    //   { path: 'projectDocs' }
+    // ]).lean();
+    const projectsPromise = Project.aggregate([
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'categoryId',
+          foreignField: '_id',
+          as: 'category',
+        },
+      },
+     
+      { $unwind: '$category' },
+      {
+        $lookup: {
+          from: 'projectdocs',
+          localField: '_id',
+          foreignField: 'projectId',
+          as: 'projectDocs',
+        },
+      },
+      { $match: { $or: [{'category.parentId':new mongoose.Types.ObjectId(categoryId)},{categoryId: new mongoose.Types.ObjectId(categoryId)}]} },
+      { $project: { category: 1, user: 1, projectDocs: 1, projectTitle : 1, piName : 1,focalPoint : 1, projectType : 1,_id : 1 } },
+    ]);
+    
+    const [projects] = await Promise.all([projectsPromise])
     // If no projects
-    if (!projects?.length) {
+    if (!projects.length) {
       return res.status(400).json({ message: 'No projects found for the specified category' });
     }
-
-    // Fetch project reviews for each project
-    const projectIds = projects.map((project) => project._id);
-    const projectReviews = await ProjectReview.find({ projectId: { $in: projectIds } }).lean();
-
-    // Group project reviews by projectId
-    const projectReviewsByProjectId = projectReviews.reduce((acc, review) => {
-      if (!acc[review.projectId]) {
-        acc[review.projectId] = [];
-      }
-      acc[review.projectId].push(review);
-      return acc;
-    }, {});
-
-    // Assign project reviews to their respective projects
-    projects.forEach((project) => {
-      const projectId = project._id;
-      project.projectReviews = projectReviewsByProjectId[projectId] || [];
-    });
 
     res.status(201).json({data:projects});
   } catch (error) {
